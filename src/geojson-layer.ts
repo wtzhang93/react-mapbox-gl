@@ -4,14 +4,10 @@ import * as MapboxGL from 'mapbox-gl';
 const isEqual = require('deep-equal'); //tslint:disable-line
 import diff from './util/diff';
 import { generateID } from './util/uid';
-import { Sources, SourceOptionData, Context, LayerType } from './util/types';
+import { SourceOptionData, Context, LayerType } from './util/types';
+import { toCamelCase } from './util/string';
 
 const types = ['symbol', 'line', 'fill', 'fill-extrusion', 'circle'];
-const toCamelCase = (str: string) => (
-  str.replace(/(?:^\w|[A-Z]|\b\w)/g, (letter, index) => (
-    index === 0 ? letter.toLowerCase() : letter.toUpperCase()
-  )).replace(/[\s+]|-/g, '')
-);
 
 const eventToHandler = {
   mousemove: 'OnMouseMove',
@@ -102,6 +98,7 @@ type Paints =
   | MapboxGL.SymbolPaint
   | MapboxGL.CirclePaint
   | MapboxGL.FillExtrusionPaint;
+
 type Layouts =
   | MapboxGL.FillLayout
   | MapboxGL.LineLayout
@@ -115,9 +112,10 @@ export default class GeoJSONLayer extends React.Component<Props> {
     map: PropTypes.object
   };
 
-  private id: string = this.props.id || `geojson-${generateID()}`;
+  private id = this.props.id || `geojson-${generateID()}`;
 
-  private source: Sources = {
+  // tslint:disable-next-line:no-any
+  private source: any = {
     type: 'geojson',
     ...this.props.sourceOptions,
     data: this.props.data
@@ -240,12 +238,15 @@ export default class GeoJSONLayer extends React.Component<Props> {
     this.unbind();
   }
 
+  // tslint:disable-next-line:no-any
+  private isGeoJsonSource = (source: any): source is MapboxGL.GeoJSONSource => !!source.setData;
+
   public componentWillReceiveProps(props: Props) {
     const { data, before, layerOptions } = this.props;
     const { map } = this.context;
-
-    if (props.data !== data) {
-      (map.getSource(this.id) as MapboxGL.GeoJSONSource).setData(props.data);
+    const currentSource = map.getSource(this.id);
+    if (props.data !== data && this.isGeoJsonSource(currentSource)) {
+      currentSource.setData(props.data);
 
       this.source = {
         type: 'geojson',

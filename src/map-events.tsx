@@ -101,7 +101,7 @@ export const events: EventMapping = {
 export type Listeners = {[T in keyof Events]: (evt: React.SyntheticEvent<any>) => void };
 
 export const listenEvents = (partialEvents: EventMapping, props: Partial<Events>, map: MapboxGl.Map) =>
-  Object.keys(partialEvents).reduce((listeners, event: keyof Events) => {
+  Object.keys(partialEvents).reduce((listeners, event: string) => {
     const propEvent = props[event];
 
     if (propEvent) {
