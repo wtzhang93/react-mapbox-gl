@@ -95,7 +95,7 @@ function layerMouseTouchEvents(
         }
       });
 
-      if (this.areFeaturesDraggable(children)) {
+      if (this.areFeaturesDraggable(children) && map.dragPan.isEnabled()) {
         map.dragPan.disable();
       }
     };
@@ -104,7 +104,7 @@ function layerMouseTouchEvents(
     public onMouseLeave = (evt: any) => {
       const children = this.getChildren();
       const { map } = this.context;
-      if (this.areFeaturesDraggable(children)) {
+      if (this.areFeaturesDraggable(children) && !map.dragPan.isEnabled()) {
         map.dragPan.enable();
       }
 
@@ -150,7 +150,9 @@ function layerMouseTouchEvents(
       map.once(endEvent, (evt: any) => {
         map.off(moveEvent, this.onFeatureDragStart);
         map.off(moveEvent, this.onFeatureDrag);
-        this.onFeatureDragEnd(evt);
+        if (this.draggedChildren) {
+          this.onFeatureDragEnd(evt);
+        }
       });
     };
 
