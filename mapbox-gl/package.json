@@ -1,0 +1,5 @@
+{
+    "name": "mapbox-gl",
+    "main": "mapbox-gl-dev.js",
+    "version": "0.1.0"
+}
